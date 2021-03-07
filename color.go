@@ -1,31 +1,66 @@
 package gocolor
 
 import (
+	"errors"
 	"fmt"
+	"regexp"
 	"strconv"
-	"strings"
 )
 
-type rgb struct {
-	r int64
-	g int64
-	b int64
-}
+var hexError = errors.New("invalid hex color")
+var hexPattern = regexp.MustCompile(`^#[a-fA-F0-9]{6}$`)
 
-func hexToRGB(hex string) rgb {
-	if strings.HasPrefix(hex, "#") && len(hex) == 7 {
-		hex = hex[1:]
+func hexToANSI(hex string, fg bool) (string, error) {
+	if !hexPattern.MatchString(hex) {
+		return "", hexError
 	}
-	r, _ := strconv.ParseInt(hex[:2], 16, 64)
-	g, _ := strconv.ParseInt(hex[2:4], 16, 64)
-	b, _ := strconv.ParseInt(hex[4:6], 16, 64)
-	return rgb{r, g, b}
+  var where int
+  if fg {
+    where = 38 
+  } else {
+    where = 48
+  }
+	r, _ := strconv.ParseInt(hex[1:3], 16, 0)
+	g, _ := strconv.ParseInt(hex[3:5], 16, 0)
+	b, _ := strconv.ParseInt(hex[5:], 16, 0)
+
+	return fmt.Sprintf("\033[%d;2;%d;%d;%dm", where, r, g, b), nil
 }
 
-func (color rgb) toANSIfg() string {
-	return fmt.Sprintf("\033[38;2;%+v;%+v;%+vm", color.r, color.g, color.b)
+var reset string = "\033[0m"
+
+// Print just like `fmt.Print()`, but with color
+func Print(hex string, fg bool, a ...interface{}) error {
+  esc, err := hexToANSI(hex, fg) 
+  if err != nil {
+    return err
+  }
+	fmt.Print(esc)
+	fmt.Print(a...)
+	fmt.Print(reset)
+  return nil
 }
 
-func (color rgb) toANSIbg() string {
-	return fmt.Sprintf("\033[48;2;%+v;%+v;%+vm", color.r, color.g, color.b)
+// Printf just like `fmt.Printf()`, but with color
+func Printf(hex string, fg bool, format string, a ...interface{}) error {
+  esc, err := hexToANSI(hex, fg) 
+  if err != nil {
+    return err
+  }
+	fmt.Print(esc)
+	fmt.Printf(format, a...)
+	fmt.Print(reset)
+  return nil
+}
+
+// Println just like `fmt.Println()`, but with color
+func Println(hex string, fg bool, a ...interface{}) error {
+  esc, err := hexToANSI(hex, fg) 
+  if err != nil {
+    return err
+  }
+	fmt.Print(esc)
+	fmt.Println(a...)
+	fmt.Print(reset)
+  return nil
 }

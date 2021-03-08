@@ -11,8 +11,9 @@ func TestPrint(t *testing.T) {
 
 func TestPrintf(t *testing.T) {
 	name := "Bob"
-	str := "${b#439028}%s${reset} is a name.\n"
-	Printf(str, name)
+  color := "#99f910"
+	str := "${b%s}%s${reset} is a name.\n"
+	Printf(str, color, name)
 }
 
 func TestPrintln(t *testing.T) {

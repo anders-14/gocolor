@@ -64,9 +64,10 @@ func Print(str string) {
 
 // Printf does the same as Print, but with string formatting.
 func Printf(str string, a ...interface{}) {
+  str = fmt.Sprintf(str, a...)
 	fmtStrs := findColorBlocks(str)
 	cStr := replaceColorBlocks(str, fmtStrs)
-	fmt.Printf(cStr, a...)
+	fmt.Print(cStr)
 }
 
 // Println does the same as Print, but with a newline at the end.
